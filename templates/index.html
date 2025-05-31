@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Chat with AdeLiving</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+
+<div class="chat-container">
+
+  <!-- Header -->
+  <div class="chat-header">
+    <div>
+      💬 Chat with <strong>AdeLiving</strong>
+      <div class="status">Online • Real Estate Assistant</div>
+    </div>
+  </div>
+
+  <!-- Chat Messages -->
+  <div class="chat-body" id="chat-box">
+    <!-- Messages will be added here dynamically -->
+  </div>
+
+  <!-- Input Area -->
+  <div class="chat-footer">
+    <input type="text" id="input" placeholder="Ask something about real estate..." onkeypress="handleKeyPress(event)">
+    <button onclick="sendMessage()">Send</button>
+  </div>
+
+</div>
+
+<script>
+  function formatTime() {
+    const now = new Date();
+    return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+  }
+
+  async function sendMessage() {
+    const input = document.getElementById("input");
+    const chatBox = document.getElementById("chat-box");
+    const message = input.value.trim();
+    if (!message) return;
+
+    // Add user message
+    chatBox.innerHTML += `
+      <div class="message user">
+        <img src="https://cdn-icons-png.flaticon.com/512/1946/1946429.png" class="avatar">
+        <div>
+          <div class="bubble">${message}</div>
+          <div class="timestamp">${formatTime()}</div>
+        </div>
+      </div>
+    `;
+    input.value = "";
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Add typing indicator
+    const loadingId = `loading-${Date.now()}`;
+    chatBox.innerHTML += `
+      <div class="message bot" id="${loadingId}">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" class="avatar">
+        <div class="bubble typing-indicator">AdeLiving is typing...</div>
+      </div>
+    `;
+    chatBox.scrollTop = chatBox.scrollHeight;
+
+    // Fetch bot response
+    const res = await fetch("/chat", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ message })
+    });
+
+    const data = await res.json();
+
+    // Replace typing with bot response
+    document.getElementById(loadingId).outerHTML = `
+      <div class="message bot">
+        <img src="https://cdn-icons-png.flaticon.com/512/4712/4712035.png" class="avatar">
+        <div>
+          <div class="bubble">${data.response}</div>
+          <div class="timestamp">${formatTime()}</div>
+        </div>
+      </div>
+    `;
+    chatBox.scrollTop = chatBox.scrollHeight;
+  }
+
+  function handleKeyPress(e) {
+    if (e.key === "Enter") sendMessage();
+  }
+</script>
+
+</body>
+</html>
