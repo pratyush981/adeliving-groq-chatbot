@@ -2,7 +2,7 @@ from flask import Flask, request, jsonify, render_template
 import requests
 
 # Hardcoded Groq API Key
-GROQ_API_KEY = "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"
+GROQ_API_KEY = "12345tytresa"
 GROQ_API_URL = "https://api.groq.com/openai/v1/chat/completions"
 
 app = Flask(__name__)
